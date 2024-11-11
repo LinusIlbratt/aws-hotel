@@ -2,7 +2,7 @@ service: hotel-booking-api
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs20.x
   stage: dev
   region: eu-north-1
   profile: ${env:AWS_PROFILE}
@@ -16,10 +16,10 @@ provider:
       Resource: "*"
   role: arn:aws:iam::586794465159:role/bookingDevRole
 
-functions:
-  hello:
-    handler: handler.hello
+functions:  
+  getAvailableRooms:
+    handler: functions/getAvailableRooms/index.handler
     events:
       - http:
-          path: hello
+          path: /available-rooms
           method: get
