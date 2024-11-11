@@ -16,6 +16,33 @@ provider:
       Resource: "*"
   role: arn:aws:iam::586794465159:role/bookingDevRole
 
+resources:
+  Resources:
+    HotelDb:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Rooms
+        AttributeDefinitions:
+          - AttributeName: RoomID
+            AttributeType: S
+          - AttributeName: RoomType
+            AttributeType: S
+          - AttributeName: available
+            AttributeType: BOOL
+        KeySchema:
+          - AttributeName: RoomID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: RoomTypeAvailableIndex
+            KeySchema:
+              - AttributeName: RoomType
+                KeyType: HASH
+              - AttributeName: available
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
 functions:  
   getAvailableRooms:
     handler: functions/getAvailableRooms/index.handler
