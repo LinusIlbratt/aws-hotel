@@ -1,40 +1,39 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { DynamoDBClient, BatchWriteItemCommand } from '@aws-sdk/client-dynamodb';
+import { marshall } from '@aws-sdk/util-dynamodb';
+import { sendResponse } from '../../responses/index.js';
 
-const dynamoDbClient = new DynamoDBClient({ region: "eu-north-1" });
+const db = new DynamoDBClient({ region: 'eu-north-1' });
 
 export const handler = async (event) => {
     try {
-        const { roomId, roomType, available, pricePerNight, maxGuests } = JSON.parse(event.body);
+        const rooms = JSON.parse(event.body);
 
-        const room = {
-            RoomID: roomId,
-            RoomType: roomType,
-            available: available === true ? 1 : 0,
-            pricePerNight: pricePerNight,
-            maxGuests: maxGuests
-        };
-
-        console.log("Room object:", room);  
+        // creates an array of `PutRequest`-objekt for each room
+        const putRequests = rooms.map(room => ({
+            PutRequest: {
+                Item: marshall({
+                    RoomID: room.roomId,
+                    RoomType: room.roomType,
+                    available: room.available ? 1 : 0,
+                    pricePerNight: room.pricePerNight,
+                    maxGuests: room.maxGuests
+                })
+            }
+        }));
 
         const params = {
-            TableName: "HotelRooms",  
-            Item: marshall(room, { removeUndefinedValues: true })
+            RequestItems: {
+                'HotelRooms': putRequests
+            }
         };
-        
 
-        const command = new PutItemCommand(params);
-        await dynamoDbClient.send(command);
+        // sends batchrequest to DynamoDB
+        const command = new BatchWriteItemCommand(params);
+        await db.send(command);
 
-        return {
-            statusCode: 201,
-            body: JSON.stringify({ message: "Room added to the database successfully" })
-        };
+        return sendResponse(200, { message: "Rooms added successfully in batch" });
     } catch (error) {
-        console.error("Error adding room:", error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: "Internal Server Error" })
-        };
+        console.error('Error adding rooms to DynamoDB:', error);
+        return sendResponse(500, { message: "Internal Server Error" });
     }
 };
