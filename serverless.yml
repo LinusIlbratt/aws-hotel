@@ -53,6 +53,14 @@ functions:
       - http:
           path: /available-rooms
           method: get
+
+      - http:
+          path: /available-rooms/{roomType}
+          method: get
+          request:
+            parameters:
+              paths:
+                roomType: false  # Optional parameter
 addRoom:
     handler: functions/addRoom/index.handler
     events:
