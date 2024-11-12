@@ -53,9 +53,16 @@ functions:
       - http:
           path: /available-rooms
           method: get
-  addRoom:
+addRoom:
     handler: functions/addRoom/index.handler
     events:
       - http:
           path: /addRoom
-          method: post
+          method: post  
+cancelBooking:
+    handler: functions/cancelBooking/index.cancelBooking
+    events:
+      - http:
+          path: booking/{bookingId}
+          method: delete
+          cors: true
