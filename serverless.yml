@@ -23,3 +23,10 @@ functions:
       - http:
           path: /available-rooms
           method: get
+  cancelBooking:
+    handler: functions/cancelBooking/index.cancelBooking
+    events:
+      - http:
+          path: booking/{bookingId}
+          method: delete
+          cors: true
