@@ -63,21 +63,21 @@ functions:
             parameters:
               paths:
                 roomType: false  # Optional parameter
-addRoom:
+  addRoom:
     handler: functions/addRoom/index.handler
     events:
       - http:
           path: /addRoom
           method: post
           cors: true 
-cancelBooking:
+  cancelBooking:
     handler: functions/cancelBooking/index.cancelBooking
     events:
       - http:
           path: booking/{bookingId}
           method: delete
           cors: true
-getBookings:
+  getBookings:
     handler: functions/getBookings/index.handler
     events:
       - http:
