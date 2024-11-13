@@ -66,10 +66,12 @@ functions:
       - http:
           path: /available-rooms
           method: get
+          cors: true
 
       - http:
           path: /available-rooms/{roomType}
           method: get
+          cors: true
           request:
             parameters:
               paths:
@@ -79,7 +81,9 @@ functions:
     events:
       - http:
           path: /addRoom
-          method: post    
+          method: post  
+          cors: true 
+
   cancelBooking:
     handler: functions/cancelBooking/index.cancelBooking
     events:
@@ -95,3 +99,10 @@ functions:
           method: post
           cors: true
 
+  getBookings:
+    handler: functions/getBookings/index.handler
+    events:
+      - http:
+          path: /checkBooking
+          method: get
+          cors: true  
