@@ -45,6 +45,13 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+          - IndexName: AvailableIndex  # new index for all available rooms
+            KeySchema:
+              - AttributeName: available
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
    
     HotelBookingsTable:
       Type: AWS::DynamoDB::Table
@@ -61,21 +68,16 @@ resources:
 
 functions:  
   getAvailableRooms:
-    handler: functions/getAvailableRooms/index.checkAvailableRooms
+    handler: functions/getAvailableRooms/index.handler
     events:
       - http:
           path: /available-rooms
           method: get
           cors: true
-
       - http:
-          path: /available-rooms/{roomType}
+          path: available-rooms/{roomType}
           method: get
           cors: true
-          request:
-            parameters:
-              paths:
-                roomType: false  # Optional parameter
   addRoom:
     handler: functions/addRoom/index.handler
     events:
