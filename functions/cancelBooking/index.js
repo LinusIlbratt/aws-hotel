@@ -1,9 +1,23 @@
 import { sendResponse } from '../../responses/index.js';
+import { DynamoDBClient, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
+
+const db = new DynamoDBClient({ region: "eu-north-1" });
 
 export const cancelBooking = async (event) => {
     try {
-        const { bookingId } = event.pathParameters;
-        console.log(`Avbokar bokning med ID: ${bookingId}`);
+        const { bookingId } = JSON.parse(event.body);
+
+        if (!bookingId) {
+            return sendResponse(400, { success: false, message: "Inget bookingId angivet." });
+        }
+
+        // DynamoDB-request 
+        const deleteParams = {
+            TableName: "HotelBookings",
+            Key: { bookingID: { S: bookingId } }
+        };
+        
+        await db.send(new DeleteItemCommand(deleteParams));
         
         return sendResponse(200, { 
             success: true, 
