@@ -75,9 +75,10 @@ functions:
           method: get
           cors: true
       - http:
-          path: available-rooms/{roomType}
+          path: /available-rooms/{roomType}
           method: get
           cors: true
+
   addRoom:
     handler: functions/addRoom/index.handler
     events:

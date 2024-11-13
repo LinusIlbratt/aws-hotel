@@ -3,10 +3,9 @@ import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 const dynamoDbClient = new DynamoDBClient({ region: "eu-north-1" });
 
-export const handler = async (event) => {
-    const roomType = event.pathParameters?.roomType;
 
-    // params for both queries
+export const checkAvailableRooms = async (roomType = null) => {
+    
     const params = {
         TableName: "HotelRooms",
         ExpressionAttributeValues: {
@@ -14,7 +13,7 @@ export const handler = async (event) => {
         },
     };
 
-    // update params based on if roomType is defined
+    
     if (roomType) {
         params.IndexName = "RoomTypeAvailableIndex";
         params.KeyConditionExpression = "RoomType = :roomType AND available = :available";
@@ -28,21 +27,15 @@ export const handler = async (event) => {
         const command = new QueryCommand(params);
         const result = await dynamoDbClient.send(command);
 
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message: "Rooms retrieved successfully",
-                rooms: result.Items ? result.Items.map((item) => unmarshall(item)) : []
-            }),
-        };
+        return result.Items ? result.Items.map((item) => unmarshall(item)) : [];
     } catch (error) {
         console.error("Error fetching available rooms:", error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                message: "Error fetching available rooms",
-                error: error.message,
-            }),
-        };
+        throw error;
     }
+};
+
+
+export const handler = async (event) => {
+    const roomType = event.pathParameters?.roomType;
+    return await checkAvailableRooms(roomType);
 };
