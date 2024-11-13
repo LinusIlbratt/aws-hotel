@@ -104,5 +104,5 @@ functions:
     events:
       - http:
           path: /checkBooking
-          method: post
+          method: get
           cors: true
