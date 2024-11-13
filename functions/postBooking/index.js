@@ -48,14 +48,14 @@ try {
 for (let room of selectedRooms) {
     const updateParams = {
         TableName: "HotelRooms",
-        Key: marshall({ RoomID: availableRoom.RoomID }),
+        Key: marshall({ RoomID: room.RoomID }),
         UpdateExpression: "SET available = :newAvailable",
         ExpressionAttributeValues: {
             ":newAvailable": { N: "0" }
         }
     };
     const updateCommand = new UpdateItemCommand(updateParams);
-    await db.sens(updateCommand)
+    await db.send(updateCommand)
 }
     
     const booking = {
