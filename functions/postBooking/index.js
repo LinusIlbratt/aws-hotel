@@ -10,21 +10,42 @@ export const handler = async (event) => {
       
    
 try {
-    const { guests, roomType, checkInDate, checkOutDate, name, email } = JSON.parse(event.body);
+    const { guests, checkInDate, checkOutDate, name, email } = JSON.parse(event.body);
 
 
-    if (!guests || !roomType || !checkInDate || !checkOutDate || !name || !email) {
+    if (!guests || !checkInDate || !checkOutDate || !name || !email) {
         return sendResponse(400, { message: "Enter empty fields." });
     }
-    const availableRooms = await checkAvailableRooms(roomType);
-    const availableRoom = availableRooms.find(room => room.maxGuests >= guests);
+    const availableRooms = await checkAvailableRooms();
+  
+   
 
 
     
-    if (!availableRoom) {
-        return sendResponse(400, { message: "No available rooms can accommodate the number of guests." });
+    if (!Array.isArray(availableRooms) || availableRooms.length === 0) {
+        return sendResponse(400, { message: "No available rooms found." });
     }
 
+    availableRooms.sort((a, b) => b.maxGuests - a.maxGuests);
+
+    let selectedRooms = [];
+    let totalCapacity = 0;
+    
+    for (let room of availableRooms) {
+        if (totalCapacity < guests) {
+            selectedRooms.push(room);
+            totalCapacity += room.maxGuests;
+        }
+        if (totalCapacity >= guests) break; 
+    }
+
+    
+   
+    if (totalCapacity < guests) {
+        return sendResponse(400, { message: "No combination of available rooms can accommodate the number of guests." });
+    }
+
+for (let room of selectedRooms) {
     const updateParams = {
         TableName: "HotelRooms",
         Key: marshall({ RoomID: availableRoom.RoomID }),
@@ -33,21 +54,21 @@ try {
             ":newAvailable": { N: "0" }
         }
     };
-    
     const updateCommand = new UpdateItemCommand(updateParams);
-    await db.send(updateCommand);
-
+    await db.sens(updateCommand)
+}
+    
     const booking = {
         bookingID: generateUniqueId(),
-        roomId: availableRoom.RoomID,
-        roomType: availableRoom.RoomType,
+        roomIds: selectedRooms.map(room => room.RoomID),
+        roomTypes: selectedRooms.map(room => room.RoomType),
         name,
         email,
         guests,
         checkInDate,
         checkOutDate,
         bookingStatus: "confirmed",
-        pricePerNight: availableRoom.pricePerNight
+        totalPricePerNight: selectedRooms.reduce((total, room) => total + room.pricePerNight, 0)
     };
     const putParams = {
         TableName: "HotelBookings",
