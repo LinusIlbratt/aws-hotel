@@ -45,6 +45,19 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
+   
+    HotelBookingsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: HotelBookings
+        AttributeDefinitions:
+          - AttributeName: bookingID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: bookingID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST  
+                     
 
 functions:  
   getAvailableRooms:
@@ -68,8 +81,9 @@ functions:
     events:
       - http:
           path: /addRoom
-          method: post
+          method: post  
           cors: true 
+
   cancelBooking:
     handler: functions/cancelBooking/index.cancelBooking
     events:
@@ -77,11 +91,18 @@ functions:
           path: booking/{bookingId}
           method: delete
           cors: true
+  postBooking:
+    handler: functions/postBooking/index.handler
+    events:
+      - http:
+          path: /booking
+          method: post
+          cors: true
+
   getBookings:
     handler: functions/getBookings/index.handler
     events:
       - http:
           path: /checkBooking
           method: get
-          cors: true
-  
+          cors: true  

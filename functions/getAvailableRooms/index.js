@@ -4,7 +4,7 @@ import { sendResponse } from '../../responses/index.js';
 
 const dynamoDbClient = new DynamoDBClient({ region: "eu-north-1" });
 
-export const handler = async (event) => {
+export const checkAvailableRooms = async (event) => {
     try {
         // GET roomType from path parameters (e.g., /available-rooms/single)
         const roomType = event.pathParameters?.roomType;
