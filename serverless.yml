@@ -61,7 +61,7 @@ resources:
 
 functions:  
   getAvailableRooms:
-    handler: functions/getAvailableRooms/index.handler
+    handler: functions/getAvailableRooms/index.checkAvailableRooms
     events:
       - http:
           path: /available-rooms
