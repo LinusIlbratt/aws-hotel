@@ -7,7 +7,7 @@ const db = new DynamoDBClient({ region: "eu-north-1" });
 export const cancelBooking = async (event) => {
     try {
         // Get bookingId from request body
-        const { bookingId } = JSON.parse(event.body);
+        const bookingId = event.pathParameters?.bookingId;
 
         if (!bookingId) {
             return sendResponse(400, { success: false, message: "Inget bookingId angivet." });

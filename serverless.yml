@@ -91,9 +91,10 @@ functions:
     handler: functions/cancelBooking/index.cancelBooking
     events:
       - http:
-          path: booking/cancel
+          path: booking/cancel/{bookingId}
           method: delete
           cors: true
+
   postBooking:
     handler: functions/postBooking/index.handler
     events:
