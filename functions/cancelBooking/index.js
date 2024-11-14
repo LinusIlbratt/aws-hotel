@@ -1,5 +1,5 @@
 import { sendResponse } from '../../responses/index.js';
-import { DynamoDBClient, DeleteItemCommand, GetItemCommand, BatchWriteItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, DeleteItemCommand, GetItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 const db = new DynamoDBClient({ region: "eu-north-1" });
@@ -28,23 +28,26 @@ export const cancelBooking = async (event) => {
 
         const booking = unmarshall(result.Item);
 
+        // Error handling if no rooms in booking
+        if (!booking.roomIds || booking.roomIds.length === 0) {
+            return sendResponse(400, { success: false, message: "Inga rum associerade med bokningen." });
+        }
+
         // Resetting room availability
-        const batchRequests = booking.roomIds.map(roomId => ({
-            PutRequest: {
-                Item: marshall({
-                    RoomID: roomId,
-                    available: 1 // Reset availability to 1 (available)
-                })
-            }
-        }));
+        for (let roomId of booking.roomIds) {
+            const updateParams = {
+                TableName: "HotelRooms",
+                Key: marshall({ RoomID: roomId }),
+                UpdateExpression: "SET available = :newAvailable",
+                ExpressionAttributeValues: {
+                    ":newAvailable": { N: "1" } // Setting availability to 1 (available)
+                }
+            };
 
-        const batchParams = {
-            RequestItems: {
-                'HotelRooms': batchRequests
-            }
-        };
+            const updateCommand = new UpdateItemCommand(updateParams);
+            await db.send(updateCommand);
+        }
 
-        await db.send(new BatchWriteItemCommand(batchParams));
         // Delete from DynamoDB
         const deleteParams = {
             TableName: "HotelBookings",
