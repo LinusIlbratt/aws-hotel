@@ -23,6 +23,8 @@ export async function createBooking(db, selectedRooms, bookingDetails) {
     }
 
     // Skapa bokningen med valda rum
+    const totalNights = (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24);
+    const totalPricePerNight = selectedRooms.reduce((total, room) => total + room.pricePerNight, 0);
     const booking = {
         bookingID: generateUniqueId(),
         roomIds: selectedRooms.map(room => room.RoomID),
@@ -33,7 +35,8 @@ export async function createBooking(db, selectedRooms, bookingDetails) {
         checkInDate,
         checkOutDate,
         bookingStatus: "confirmed",
-        totalPricePerNight: selectedRooms.reduce((total, room) => total + room.pricePerNight, 0)
+        totalPricePerNight,
+        totalCost: totalPricePerNight * totalNights
     };
     const putParams = {
         TableName: "HotelBookings",
